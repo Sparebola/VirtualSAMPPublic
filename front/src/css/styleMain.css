@@ -1,0 +1,46 @@
+.container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 160px auto;
+}
+
+.intro {
+  margin: 10px;
+}
+
+.intro__title {
+  color: white;
+  font-weight: bold;
+  font-size: 30px;
+  line-height: 30px;
+}
+
+.intro__subtitle {
+  padding-top: 20px;
+  color: white;
+  font-weight: normal;
+  font-size: 16px;
+}
+
+.service-info {
+  padding-top: 20px;
+  font-size: 16px;
+  color: white;
+  display: flex;
+}
+
+.service-info__service {
+  display: flex;
+}
+
+.service-info__response {
+  margin-left: 56px;
+}
+
+.response__wait {
+  display: flex;
+  align-items: flex-end;
+  width: 67px;
+  height: 50%;
+  border-bottom: 2px solid rgb(151, 111, 0);
+}

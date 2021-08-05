@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @@include("_head.html")
+
+    <!-- work -->
+    <link rel="stylesheet" href="assets/css/styleApi.css">
+</head>
+<body>
+    <div class="content">
+        @@include("_header.html")
+        
+        <!-- work -->
+        <div class="container">
+            <div class="info">
+                Вы можете получить все данные сайта в виде удобной json таблицы.
+                <br>
+                Важно! Не суйте вызов api в беск цикл. Данные на сервер обновляются с задержкой (от 10 сек до 10 мин), поэтому спользуйте вызов хотябы раз в минуту!
+                <br>
+                <br>
+                Ссылка: 
+                <a href="api?" target="_blank">
+                    sparebola.ru/virtualsamp/api?
+                </a>
+                <br>
+                Она принимает параметры: action и block.
+                <br>
+                "?action" = respond, players, top, gangzone, server.
+                <br>
+                "&block" = dinamic, static. Это нужно для "?action=server". Dinamic получает чат и киллстат, static всё остальное.
+                <br>
+                <br>
+                Примеры:
+                <br>
+                Выводит данные чата и киллстата (4 страница):
+                <br>
+                <a href="api?action=server&block=dinamic" target="_blank">
+                    https://sparebola.ru/virtualsamp/api?action=server&block=dinamic
+                </a>
+                <br>
+                Выводит данные сервиса (1 страница):
+                <br>
+                <a href="api?action=respond" target="_blank">
+                    https://sparebola.ru/virtualsamp/api?action=respond
+                </a>
+                <br>
+                Выводит данные топа (3 страница):
+                <br>
+                <a href="api?action=top" target="_blank">
+                    https://sparebola.ru/virtualsamp/api?action=top
+                </a>
+            </div>
+        </div>
+        <!-- work -->
+    </div>
+    
+    @@include("_footer.html")
+</body>
+</html>

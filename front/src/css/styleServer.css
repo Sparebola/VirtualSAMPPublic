@@ -1,0 +1,296 @@
+.container {
+	width: 100%;
+	max-width: 1189px;
+	margin: 160px auto;
+
+	color: white;
+}
+
+.margin {
+	margin: 0 10px;
+}
+
+.warning-block {
+	display: none;
+	justify-content: center;
+	color: red;
+	font-size: 15px;
+	margin: 10px;
+	text-align: center;
+	font-size: 14px;
+}
+
+.chat-block {
+	/* height: 340px; */
+	width: 100%;
+	max-width: 756px;
+}
+
+.killList-block {
+	width: 100%;
+	max-width: 407px;
+	margin-left: 10px;
+}
+
+.chat-killList {
+	display: flex;
+	font-size: 14px;
+}
+
+.chat {
+	height: 340px;
+	width: 100%;
+	max-width: 756px;
+	border-radius: 8px;
+	background: #1c1c1c;
+	overflow-y: auto;
+}
+
+.chat__line {
+	margin-top: 5px;
+	margin-left: 10px;
+	margin-right: 10px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.chat__line:last-child {
+	margin-bottom: 10px;
+}
+
+.kill-list {
+	height: 340px;
+	width: 100%;
+	border-radius: 8px;
+	background: #1c1c1c;
+	font-size: 13px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.kill-list__line {
+	margin-top: 9.5px;
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.kill-list__line:last-child {
+	margin-bottom: 9.5px;
+}
+
+.line__killer {
+	width: 100%;
+	max-width: 165.5px;
+	text-align: right;
+	margin: 0 10px;
+	overflow: hidden;
+}
+
+.line__killed {
+	width: 100%;
+	max-width: 165.5px;
+	margin: 0 10px;
+	overflow: hidden;
+}
+
+.line__weapon {
+	min-width: 32px;
+	min-height: 32px;
+	/* background: url("../img/Fists/invalid.png"); */
+	/* background-repeat: no-repeat;
+	background-size: cover; */
+}
+
+.warning-lotto {
+	display: flex;
+	justify-content: center;
+	color: red;
+	font-size: 15px;
+	margin-top: 20px;
+	margin-bottom: 10px;
+	text-align: center;
+	font-size: 14px;
+}
+
+.lotto {
+	width: 100%;
+	font-size: 15px;
+	/* margin-top: 10px; */
+	margin-top: 20px;
+}
+
+.lotto__head {
+	background: #1c1c1c;
+	border-radius: 8px;
+	/* font-size: 17px; */
+	font-weight: bold;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	display: flex;
+	justify-content: space-around;
+	text-align: center;
+}
+
+.lotto__body {
+	margin-top: 10px;
+	background: #1c1c1c;
+	border-radius: 8px;
+	/* font-size: 16px; */
+	padding-top: 10px;
+	padding-bottom: 10px;
+	display: flex;
+	justify-content: space-around;
+	font-size: 14px;
+}
+
+.lotto__enact {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 138.22px;
+}
+
+.lotto__winning-number {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 164.89px;
+}
+
+.lotto__won {
+	display: flex;
+	justify-content: center;
+	text-align: center;
+	width: 220px;
+}
+
+.lotto__new-jackpot {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 130.06px;
+}
+
+.info-block {
+	margin-top: 20px;
+	background: #1c1c1c;
+	border-radius: 8px;
+	font-size: 15px;
+}
+
+.info-block-flex {
+	padding-top: 10px;
+	display: flex;
+}
+
+.info-block-flex:last-child {
+	padding-bottom: 10px;
+}
+
+.info-block__title {
+	/* width: 206.36px; */
+	width: 100%;
+	max-width: 206.36px;
+	font-weight: bold;
+	margin-left: 10px;
+	font-size: 15px;
+}
+
+.info-block__text {
+	margin-left: 40px;
+	align-items: center;
+	font-size: 14px;
+}
+
+.warning {
+	display: flex;
+	color: red;
+	font-size: 14px;
+	margin-left: 10px;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+@media screen and (max-width: 1112px) {
+	.chat-killList {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.killList-block {
+		margin-top: 20px;
+		margin-left: 0;
+	}
+
+	.info-block, .lotto {
+		width: 100%;
+		max-width: 731px;
+	}
+
+	.server-lotto {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+}
+
+@media screen and (max-width: 465px) {
+	.chat__line {
+		font-size: 13px;
+	}
+
+	.info-block, .lotto {
+		font-size: 14px;
+	}
+
+	.kill-list {
+		font-size: 3vw;
+	}
+}
+
+@media screen and (max-width: 722px) {
+	.info-block, .lotto {
+		width: 100%;
+		max-width: 403px;
+	}
+
+	.info-block {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	
+	.info-block-flex {
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+	}
+
+	.info-block__title, .info-block__text {
+		width: auto;
+		margin: 0 10px;
+	}
+
+	.info-block__text {
+		margin-top: 10px;
+	}
+
+	.lotto__head, .lotto__body {
+		flex-direction: column;
+	}
+
+	.lotto__won, .lotto__enact, .lotto__winning-number, .lotto__new-jackpot {
+		width: auto;
+		margin-top: 10px;
+	}
+
+	.lotto__enact {
+			margin-top: 0;
+	}
+
+	.warning {
+		margin: 0;
+	}
+}

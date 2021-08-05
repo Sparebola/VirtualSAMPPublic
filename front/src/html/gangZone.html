@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @@include("_head.html")
+
+    <!-- work -->
+    <link rel="stylesheet" href="assets/css/styleGangZone.css">
+    <script src="script/gangZone.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="assets/css/datepicker.css" rel="stylesheet" type="text/css">
+    <script src="script/datepicker.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.4.1/chart.min.js"></script>
+</head>
+<body>
+    <div class="content">
+        @@include("_header.html")
+
+        <!-- work -->
+        <div class="container">
+            <div class="capture">
+                <div class="warning">
+                    <p>Информация не обновлялась с&nbsp;</p>
+                    <p id="warning">00.00.00 00:00:00</p>
+                </div>
+                
+                <div class="cap-info">
+                    <div class="cap-info__num-territories">
+                        <div class="cap-info__title">
+                            <h1>Количество территорий:</h1>
+                        </div>
+
+                        <div class="cap-info__block" id="numberTerr">
+                        
+                            <!-- <div class="num-territories__line">
+                                <div class="line__frac">The Grove Street</div>
+                                <div class="line__int">0</div>
+                            </div> -->
+
+                        </div>
+                    </div>
+    
+                    <div class="cap-info__capture">
+                        <div class="cap-info__title">
+                            <h1>Активные захваты:</h1>
+                        </div>
+
+                        <div class="capture__scroll">
+                            <div class="cap-info__block scroll" id="capInfoTerr">
+                                <!-- <div class="capture__line">
+                                    Нет активных захватов
+                                </div> -->
+
+                                <!-- <div class="capture__line">
+                                    <p style="color: aqua;">The Triads Mafia</p> vs Los Santos Vagos<br>Аммо 4 дракона | 05:37
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="change-map">
+                    <div class="change-map__date">
+                        <p>Показать карту за:</p>
+                        <input type='text' class='datepicker-here' id="timepicker-actions-exmpl">
+                    </div>
+                    <div class="change-map__cap">
+                        <input type="checkbox" id="adventure_id" onclick="changeMap()">
+                        <label for="adventure_id">Показывать ID территорий</label>
+                    </div>
+                </div>
+    
+                <div class="map">
+                    <div class="map__image" id="gangZone" style="background-size: cover;">
+                        <!-- <div class="image__gangZone">
+
+                        </div>  -->
+                    </div>
+                </div>
+
+                <div class="charts-date">
+                    <div>Показать график за:</div>
+                    <input type='text' class='datepicker-charts' id="timepicker-charts">
+                </div>
+
+                <div class="charts">
+                    <div class="charts-pad">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- work -->
+    </div>
+    
+    @@include("_footer.html")
+</body>
+</html>

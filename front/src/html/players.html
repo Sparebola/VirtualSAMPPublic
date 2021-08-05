@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @@include("_head.html")
+
+    <!-- work -->
+    <link rel="stylesheet" href="assets/css/stylePlayers.css">
+    <script src="script/players.js"></script>
+</head>
+<body>
+
+    <div class="content">
+        @@include("_header.html")
+
+        <div class="container">
+            <div class="warning" id="warning">
+                <p>Информация не обновлялась с&nbsp;</p>
+                <p id="warningDate">00.00.00 00:00:00</p>
+            </div>
+            
+            <div class="online-info">
+                <div class="info__block">
+                    <div class="info-block__content">Всего онлайн:&nbsp;</div>
+                    <div class="info-block__content" id="allOnl">0</div>
+                </div>
+                <div class="info__block">
+                    <div class="info-block__content">Игроков АФК:&nbsp;</div>
+                    <div class="info-block__content" id="afkOnl">0</div>
+                </div>
+                <div class="info__block">
+                    <div class="info-block__content">Чистый онлайн:&nbsp;</div>
+                    <div class="info-block__content" id="clearOnl">0</div>
+                </div>
+            </div>
+
+            <div class="table">                  
+                <div class="table__head" id="table">
+                    <div class="table-min">Ид</div>
+                    <div class="table-b">Игровой никнейм</div>
+                    <div class="table-min">Уровень</div>
+                    <div class="table-min">Вошёл</div>
+                    <div class="table-min">Афк</div>
+                </div>
+
+                <!-- <div class="table__body">
+                    <div class="table-min">12</div>
+                    <div class="table-b">Spark</div>
+                    <div class="table-min">300</div>
+                    <div class="table-min">04.07.2021 00:00</div>
+                    <div class="table-min">00:00:00:00</div>
+                </div>
+
+                <div class="table__body">
+                    <div class="table-min">11</div>
+                    <div class="table-b">FYP</div>
+                    <div class="table-min">123</div>
+                    <div class="table-min">04.07.2021 00:00</div>
+                    <div class="table-min">00:00:00:00</div>
+                </div>
+
+                <div class="table__body">
+                    <div class="table-min">1000</div>
+                    <div class="table-b">POLYAAAAAAAAAAAAAAAA</div>
+                    <div class="table-min">300</div>
+                    <div class="table-min">04.07.2021 00:00</div>
+                    <div class="table-min">00:00:00:00</div>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    
+    @@include("_footer.html")
+</body>
+</html>

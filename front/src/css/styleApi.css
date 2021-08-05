@@ -1,0 +1,17 @@
+.container {
+    width: 100%;
+    max-width: 800px;
+    margin: 160px auto;
+}
+
+.info {
+    color: white;
+    padding: 10px;
+    font-size: 15px;
+}
+
+.info a {
+    display: block;
+    color: white;
+    overflow-x: hidden;
+}

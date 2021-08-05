@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @@include("_head.html")
+
+    <!-- work -->
+    <link rel="stylesheet" href="assets/css/styleMain.css">
+    <script src="script/main.js"></script>
+</head>
+<body>
+    <div class="content">
+        @@include("_header.html")
+        
+        <div class="container">
+            <div class="intro">
+
+                <h1 class="intro__title">Смотри что происходит на сервере GalaxY-RPG One,<br>не заходя в игру!</h1>
+
+                <div class="intro__subtitle">С помощью данного сервиса можно смотреть текущие захваты, чат, какое сейчас x2 и другое.<br>Всё это можно найти на вкладках выше. Для разработчиков доступно API.<br>Сервис работает абсолютно бесплатно.</div>
+        
+                <div class="service-info">
+                    <!-- <div class="service-info__service">
+                        <div>
+                            На данный момент сбор данных:
+                        </div>
+                        <div class="response__wait" id="responseBot">
+                            Загрузка
+                        </div>
+                    </div>
+                    <div class="service-info__service">
+                        <div>
+                            На данный момент GY1 сервер:
+                        </div>
+                        <div class="response__wait" id="responseBot">
+                            Загрузка
+                        </div>
+                    </div> -->
+                    <div class="service-info__description">
+                        <div class="description__text">
+                            На данный момент сбор данных:
+                        </div>
+                        <div class="description__text">
+                            На данный момент GY1 сервер:
+                        </div>
+                    </div>
+         
+                    <div class="service-info__response">
+                        <div class="response__wait" id="responseBot">
+                            Загрузка
+                        </div>
+                        <div class="response__wait" id="responseServer">
+                            Загрузка
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @@include("_footer.html")
+</body>
+</html>

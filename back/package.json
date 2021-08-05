@@ -1,0 +1,28 @@
+{
+  "name": "virtualsamp",
+  "version": "1.0.1",
+  "description": "Viewing events on the server by logging into samp",
+  "main": "index.js",
+  "scripts": {
+    "serve": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sparebola/Virtual-Samp.git"
+  },
+  "author": "Sparebola",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sparebola/Virtual-Samp/issues"
+  },
+  "homepage": "https://github.com/Sparebola/Virtual-Samp#readme",
+  "dependencies": {
+    "@koa/cors": "^3.1.0",
+    "koa": "^2.13.1",
+    "koa-body": "^4.2.0",
+    "koa-router": "^10.0.0",
+    "mysql2": "^2.2.5",
+    "nodemon": "^2.0.7"
+  }
+}

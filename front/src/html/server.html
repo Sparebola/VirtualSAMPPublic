@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    @@include("_head.html")
+
+    <!-- work -->
+    <link rel="stylesheet" href="assets/css/styleServer.css">
+    <script src="script/server.js"></script>
+</head>
+<body>
+    <div class="content">
+        @@include("_header.html")
+
+        <!-- work -->
+        <div class="container">
+            <div class="margin">
+                <div class="chat-killList">
+                    <div class="chat-block">
+                        <div class="warning-block" id="warningChat">
+                            <p id="warningChatText">&nbsp;</p>
+                            <p id="warningChatDate">&nbsp;</p>
+                        </div>
+
+                        <div class="chat" id="chatList">
+                            <!-- <div class="chat__line">
+                                <div>> </div>
+                                <div>(L)</div>
+                                <div> [R][129]: п.о заказной скрытый дом сразу перед респой коронос ид 10 в пм</div>
+                            </div> -->
+                        </div>
+                    </div>
+    
+                    <div class="killList-block">
+                        <div class="warning-block" id="warningKillList">
+                            <p id="warningKillListText">&nbsp;</p>
+                            <p id="warningKillListDate">&nbsp;</p>
+                        </div>
+
+                        <div class="kill-list" id="killList">
+                            <!-- <div class="kill-list__line"> -->
+                                <!-- <div class="line__killer">
+                                    POLYAAAAAAAAAAAAAAAA
+                                </div>
+                                <div class="line__weapon">
+                                    
+                                </div>
+                                <div class="line__killed">
+                                    Bankoz
+                                </div> -->
+                            <!-- </div> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="server-lotto">
+                    <div class="info-block">
+                        <div class="info-block-flex x2">
+                            <div class="info-block__title">
+                                Двойная оплата:
+                            </div>
+                            <div class="info-block__text" id="x2">
+                                Завершено
+                            </div>
+                            <div class="warning" style="display: none;" id="warning_x2">
+                                <p>Информация не обновлялась с&nbsp;</p>
+                                <p id="warning_x2Text">00.00.00 00:00:00</p>
+                            </div>
+                        </div>
+    
+                        <div class="info-block-flex time">
+                            <div class="info-block__title">
+                                Время на сервере:
+                            </div>
+                            <div class="info-block__text" id="time">
+                                0000-00-00 00:00 (00:00 от МСК)
+                            </div>
+                            <div class="warning" style="display: none;" id="warning_time">
+                                <p>Информация не обновлялась с&nbsp;</p>
+                                <p id="warning_timeText">00.00.00 00:00:00</p>
+                            </div>
+                        </div>
+    
+                        <div class="info-block-flex ping">
+                            <div class="info-block__title">
+                                Средний пинг на сервере:
+                            </div>
+                            <div class="info-block__text" id="ping">
+                                0 мс
+                            </div>
+                            <div class="warning" style="display: none;" id="warning_ping">
+                                <p>Информация не обновлялась с&nbsp;</p>
+                                <p id="warning_pingText">00.00.00 00:00:00</p>
+                            </div>
+                        </div>
+    
+                        <div class="info-block-flex deliver">
+                            <div class="info-block__title">
+                                Матов на /deliver:
+                            </div>
+                            <div class="info-block__text" id="deliver">
+                                0
+                            </div>
+                            <div class="warning" style="display: none;" id="warning_deliver">
+                                <p>Информация не обновлялась с&nbsp;</p>
+                                <p id="warning_deliverText">00.00.00 00:00:00</p>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="warning-lotto" style="display: none;" id="warning_lotto">
+                        <p>Информация не обновлялась с&nbsp;</p>
+                        <p id="warning_lottoText">00.00.00 00:00:00</p>
+                    </div>
+
+                    <div class="lotto">
+                        <div class="lotto__head">
+                            <div class="lotto__enact">
+                                Cумма Джекпота
+                            </div>
+                            <div class="lotto__winning-number">
+                                Выигрышный номер
+                            </div>
+                            <div class="lotto__won">
+                                Выиграли
+                            </div>
+                            <div class="lotto__new-jackpot">
+                                Новый Джекпот
+                            </div>
+                        </div>
+                        <div class="lotto__body">
+                            <div class="lotto__enact" id="enact">
+                                0$
+                            </div>
+                            <div class="lotto__winning-number" id="winningNumber">
+                                -
+                            </div>
+                            <div class="lotto__won" id="won">
+                                -
+                            </div>
+                            <div class="lotto__new-jackpot" id="newJackpot">
+                                -
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- work -->
+    </div>
+    
+    @@include("_footer.html")
+</body>
+</html>
