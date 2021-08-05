@@ -4,10 +4,10 @@
 <p align="center">
   <table>
   <tr>
-      <td><img src="https://raw.githubusercontent.com/sparebola/virtualsamppublic/master/player.png" /></td>
-      <td><img src="https://raw.githubusercontent.com/sparebola/virtualsamppublic/master/server.png" /></td>
-      <td><img src="https://raw.githubusercontent.com/sparebola/virtualsamppublic/master/gangzone.png" /></td>
-      <td><img src="https://raw.githubusercontent.com/sparebola/virtualsamppublic/master/gangzonechart.png" /></td>
+      <td><img src="https://raw.githubusercontent.com/sparebola/virtualsamppublic/master/readme/player.png" /></td>
+      <td><img src="https://raw.githubusercontent.com/sparebola/virtualsamppublic/master/readme/server.png" /></td>
+      <td><img src="https://raw.githubusercontent.com/sparebola/virtualsamppublic/master/readme/gangzone.png" /></td>
+      <td><img src="https://raw.githubusercontent.com/sparebola/virtualsamppublic/master/readme/gangzonechart.png" /></td>
   </tr>   
 </table>
 </p>
