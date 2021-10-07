@@ -13,16 +13,16 @@ local u8 = encoding.UTF8;
 
 local IS_NOP_SERVER_MSG = false;
 local IS_ANTI_AFK = false;
-local IS_REQUEST_SERVER_SEND = false;
+local IS_REQUEST_SERVER_SEND = true;
 local IS_SEND_TELEGRAM = false;
 local ACCES_SEND = "";
 
 
-local HOST = "";
+local HOST = "https://sparebola.ru/virtualsamp/set";
 local AUTH_KEY = "";
 local OWNER_CHAT = "";
 local TELEGRAM_TOCKEN = "";
-local TELEGRAM_URL = "https://api.telegram.org/bot"..TELEGRAM_TOCKEN;
+local TELEGRAM_URL = ""..TELEGRAM_TOCKEN;
 
 -- Таймеры
 local timeRespond = 0;
@@ -31,7 +31,8 @@ local timePlayer = 0;
 local timeCheckAfk = 0;
 local timeTop = 0;
 
-local isSpawn = isBotSpawned();
+local state = getBotState();
+local isSpawn = state == 1 or state == 2 or state == 3;
 local currectServerYear = isBotSpawned() and os.date("%Y-%m-%d", os.time(os.date("!*t")) + 10800);
 local currectDeliver = -1;
 local accesSend = false;
@@ -71,6 +72,9 @@ local connectPlayerTime = {};
 local afkPlayerTab = {};
 local iterationsConnectPlayers = 0;
 local gangZoneTab = {};
+local currectServerTime
+local nopSendChatCommand
+local slapState = 0
 
 -- Config Telegram --
 function onDirectoryCreated(path)
@@ -103,11 +107,6 @@ local telegramSendError = getIniString(INI_PATH, "config", "telegramLastRoom");
 
 function getPlayerColor(playerId)
 	return playerColor[playerId];
-end
-
-function deleteColor(string)
-	local text = string:gsub("%{%w+%}", "");
-    return text;
 end
 
 function convectFractions(frac)
@@ -154,7 +153,7 @@ function sendGangZoneSaveTab()
 		i = i + 1;
 	end
 	if i > 0 then
-		loggerHttpRequest(HOST .. "/", {
+		loggerHttpRequest(HOST .. "/gangZoneSave", {
 			method = "POST",
 			headers = {
 				["Accept"] = "*/*",
@@ -184,9 +183,9 @@ param:
 			file:close();
 		end
 
-		if telegramSendError == "1" then
+		-- if telegramSendError == "1" then
 			sendTelegramMessage(telegramLastRoom, "Ошибка внесения в БД гангзон. Пустая таблица, "..date);
-		end
+		-- end
 	end
 end
 
@@ -224,19 +223,21 @@ function getTopTab()
 	collectionTopFlud = false;
 
 	local i = 1;
-	while true do
-		collectionTopFlud = false;
-		collectionTopTitle = i;
+	while true do Tasking.wait(0)
+		if not nopSendChatCommand then
+			collectionTopFlud = false;
+			collectionTopTitle = i;
 
-		sendInput(commandTab[i]);
-		Tasking.wait(2000);
-
-		if collectionTopFlud then
+			sendInput(commandTab[i]);
 			Tasking.wait(2000);
-		else
-			i = i + 1; 
+
+			if collectionTopFlud then
+				Tasking.wait(2000);
+			else
+				i = i + 1; 
+			end
+			if i > #commandTab then break end
 		end
-		if i > #commandTab then break end
 	end
 
 	collectionTop = false;
@@ -253,7 +254,7 @@ function sendPendingGangzoneTwoPackage(wGangZoneID)
 
 			if gangZoneIntTab[wGangZoneID] == 1 then -- Если пакет пришел 1 раз (территорию не захватили)
 
-				loggerHttpRequest(HOST .. "/", {
+				loggerHttpRequest(HOST .. "/gangzoneFlash", {
 					query = {
 						gangZoneID = wGangZoneID,
 						color2 = "#FFFFFF",
@@ -286,7 +287,7 @@ function getConnectPlayers()
 	local myID = getBotId();
 
 	for i = 0, 1000 do
-		local nick, lvl, lconnectDate, afkTime;
+		local nick, lvl, lconnectDate;
 
 		if i == myID then
 			nick = getNickName();
@@ -385,7 +386,7 @@ response:
 				file:write(log);
 				file:close();
 
-				if telegramSendError == "1" then
+				-- if telegramSendError == "1" then
 					local text = [[ 
 (%s МСК)
 error: Отправляемый запрос не достиг сервера.
@@ -396,7 +397,7 @@ response:
 %s]]
 					local log = (text):format(date, url, code, (options.method or "GET"), response);
 					sendTelegramMessage(telegramLastRoom, log);
-				end
+				-- end
 			end
 		end
 	end);
@@ -508,10 +509,11 @@ function getCurrectDate(textDrawId, textDrawString)
 		local hour, min = textDrawString:match("%~w%~(%d+)%~y%~:%~w%~(%d+)");
 		if hour and min then
 			local time = hour .. ":" .. min;
+			currectServerTime = {hour = tonumber(hour), min = tonumber(min)}
 
 			if currectServerYear ~= -1 then
 				local date = ("%s %s"):format(currectServerYear, time);
-				loggerHttpRequest(HOST .. "/", {
+				loggerHttpRequest(HOST .. "/serverTab", {
 					query = {
 						param = date,
 						field = "time",
@@ -529,10 +531,60 @@ function getCurrectDate(textDrawId, textDrawString)
 	end
 end
 
+function sendSlapSync(x, y, z, x2, y2, z2)
+    -- https://www.blast.hk/threads/27939/
+    local speedv = -0.1
+    local b = 0
+    Tasking.new(function()
+        while slapState ~= 0 do
+            if slapState == 1 then
+                if z2 ~= z then
+                    if z2 >= z then z = z2 end
+                    z = z + speedv
+                    local spz = speedv / 3
+                    setSpeed(0, 0, spz)
+                    setPosition(x, y, z)
+                    speedv = speedv - 0.8
+                    if speedv < - 0.8 then
+                        speedv = -0.8
+                    end
+                    sendSync()
+                    if z2 >= z then
+                        b = y2 + 1
+                        speedv = -0.1
+                        setPosition(x2, y2, z2)
+                        sendSync()
+                        slapState = 2
+                    end
+                end
+            end
+            if slapState == 2 then
+                if y2 <= b then
+                    y2 = y2 + 0.2
+                    setSpeed(0, 0, 0.05)
+                    setPosition(x2, y2, z2)
+                    sendSync()
+                else
+                    slapState = 0
+                end
+            end
+            Tasking.wait(100);
+        end
+    end)
+end
+
 function hexRemoveClarity(hex)
 	return hex:sub(0, 6);
 end
 
+function notCrashRecconect()
+		-- ID_DISCONNECTION_NOTIFICATION - ID: 32
+		-- Parameters: UINT8 Packet_ID
+		local bs = bitStreamNew();
+		bitStreamWriteByte(bs, 32)
+		sendPacket(bs);
+		bitStreamDelete(bs);
+end
 
 -- Telegram
 function getLastTelegramMesage()
@@ -562,22 +614,22 @@ function getLastTelegramMesage()
 	return false;
 end
 
-function whileGetLastTelegramMesage()
-	while true do Tasking.wait(0)
-		if telegramLastMessageID and accesSend and IS_SEND_TELEGRAM then
-			local response = getLastTelegramMesage()
-			if response then	
-				telegramMessageHandler(response.message.text, response.message)
-			end
-			Tasking.wait(10000)
-		end
-	end
-end
-Tasking.new(whileGetLastTelegramMesage);
+-- function whileGetLastTelegramMesage()
+-- 	while true do Tasking.wait(0)
+-- 		if telegramLastMessageID and accesSend and IS_SEND_TELEGRAM then
+-- 			local response = getLastTelegramMesage()
+-- 			if response then	
+-- 				telegramMessageHandler(response.message.text, response.message)
+-- 			end
+-- 			Tasking.wait(10000)
+-- 		end
+-- 	end
+-- end
+-- Tasking.new(whileGetLastTelegramMesage);
 
 function telegramMessageHandler(text, table)
-	if text:find("/") then
-		local key = text:match("/ (.+)");
+	if text:find("/newroom") then
+		local key = text:match("/newroom (.+)");
 		if key == AUTH_KEY then
 			if telegramLastRoom ~= tostring(table.chat.id) then
 				sendTelegramMessage(telegramLastRoom, "Я больше тебя не слушаю!");
@@ -593,43 +645,49 @@ function telegramMessageHandler(text, table)
 			sendTelegramMessage(table.chat.id, "Неверный ключ!");
 		end
 		return true;
-	elseif text == "/" then
-		local text = [[]]
+	elseif text == "/help" then
+		local text = [[
+"/newroom [key]" - Указать боту в какой чат начать отправлять сообщения.
+"/send" [msg] - Сказать что-то в чат.
+"/getinfo" - Получить информацию о боте.
+"/setafk" - Вкл/выкл анти-афк
+"/senderr" - Вкл/выкл отправку ошибок.
+		]]
 		sendTelegramMessage(telegramLastRoom, text);
 	end
 
 	if telegramLastRoom == tostring(table.chat.id) then
-		if text == "/" then
+		if text == "/senderr" then
 			telegramSendError = (telegramSendError == "1" and "0" or "1");
 			local send = telegramSendError == "1" and "Теперь я буду отсылать ошибки." or "Больше не буду отсылать ошибки.";
 			setIniString(INI_PATH, "config", "sendError", telegramSendError);
 
 			sendTelegramMessage(telegramLastRoom, send);
-		elseif text:find("/") then
-			local msg = text:match("/ (.+)");
+		elseif text:find("/send") then
+			local msg = text:match("/send (.+)");
 			if msg then
-				local block = {
-					["/pm"] = 1,
-					["/o"] = 1,
-					["/report"] = 1,
-					["/n"] = 1,
-					["/s"] = 1,
-					["/c"] = 1
-				}
-				local command = msg:match("(/%a+)%s");
-				if not block[command] then
+				-- local block = {
+				-- 	["/pm"] = 1,
+				-- 	["/o"] = 1,
+				-- 	["/report"] = 1,
+				-- 	["/n"] = 1,
+				-- 	["/s"] = 1,
+				-- 	["/c"] = 1
+				-- }
+				-- local command = msg:match("(/%a+)%s");
+				-- if not block[command] then
 					sendInput(msg);
 					sendTelegramMessage(telegramLastRoom, "Сообщение: " .. msg .. ". Отправлено!");
-				else
-					sendTelegramMessage(telegramLastRoom, "Я перестаю тебя слушать!");
-					telegramLastRoom = OWNER_CHAT;
-					setIniString(INI_PATH, "config", "telegramLastRoom", tostring(telegramLastRoom));
-					sendTelegramMessage(telegramLastRoom, "Мне писали гадости, я пришел домой!");
-				end
+				-- else
+				-- 	sendTelegramMessage(telegramLastRoom, "Я перестаю тебя слушать!");
+				-- 	telegramLastRoom = OWNER_CHAT;
+				-- 	setIniString(INI_PATH, "config", "telegramLastRoom", tostring(telegramLastRoom));
+				-- 	sendTelegramMessage(telegramLastRoom, "Мне писали гадости, я пришел домой!");
+				-- end
 			else
 				sendTelegramMessage(telegramLastRoom, "Введите сообщение!");
 			end
-		elseif text == "/" then
+		elseif text == "/getinfo" then
 			local text = [[
 Ник: %s,
 Здоровье: %s,
@@ -640,9 +698,12 @@ function telegramMessageHandler(text, table)
 АФК: %s
 			]]
 			local status = {
+				[0] = "Подключение",
 				[1] = "Пешеход",
-				[0] = "Ожидание подключения",
-				[4] = "Наблюдатель"
+				[2] = "Водитель",
+				[3] = "Пассажир",
+				[4] = "Наблюдатель",
+				[5] = "Садится в машину";
 			}
 			local stat = status[getBotState()] or getBotState();
 			local connect = isBotConnected() and "Да" or "Нет";
@@ -650,8 +711,7 @@ function telegramMessageHandler(text, table)
 			local afk = not IS_ANTI_AFK and "Да" or "Нет";
 			local grant = IS_REQUEST_SERVER_SEND and "Включена" or "Выключена";
 			sendTelegramMessage(telegramLastRoom, text:format(getNickName(), getHealth(), stat, connect, spawn, grant, afk));
-
-		elseif text == "/" then
+		elseif text == "/setafk" then
 			IS_ANTI_AFK = not IS_ANTI_AFK
 			local afk = not IS_ANTI_AFK and "Теперь афк" or "Больше не афк";
 			sendTelegramMessage(telegramLastRoom, afk);
@@ -665,27 +725,44 @@ end
 
 function sendTelegramMessage(id, text)
 	if id and IS_REQUEST_SERVER_SEND and accesSend and IS_SEND_TELEGRAM then
-		Tasking.new(function()
-			wrapperHttpRequest(TELEGRAM_URL .. "/sendMessage", { 
-				query = { 
-					chat_id = id,
-					text = text;
-				}
-			});
-		end)
+		local currectWarning = true;
+
+		if currectServerTime then
+			if currectServerTime.min >= 0 and currectServerTime.min <= 20 and currectServerTime.hour == 6 then
+				currectWarning = false;
+			end
+		end
+
+		if currectWarning then
+			Tasking.new(function()
+				wrapperHttpRequest(TELEGRAM_URL .. "/sendMessage", { 
+					query = { 
+						chat_id = id,
+						text = text;
+					}
+				});
+			end)
+		end
 	end
 end
 -- Telegram -- 
 
 -- events
 function _onScriptUpdate() -- main loop -- _onScriptUpdate called on fix.lua
+	if isSpawn then
+		local state = getBotState();
+		if state ~= 1 and state ~= 2 and state ~= 3 then
+			isSpawn = false;
+			print("Больше не заспавнен")
+		end
+	end
 
 	accesSend = getNickName() == ACCES_SEND and isServerGalaxy();
 	
 	if IS_REQUEST_SERVER_SEND and accesSend then
 
 		-- Каждую секунду пробиваем афк игроков
-		if not collectionTop then
+		if not collectionTop and not nopSendChatCommand then
 			if os.time() - timeCheckAfk >= 1 and os.clock() > 15 then
 				local playerInfo = getPlayer(iterationsConnectPlayers);
 				if playerInfo then
@@ -699,11 +776,11 @@ function _onScriptUpdate() -- main loop -- _onScriptUpdate called on fix.lua
 		end
 
 		-- Каждую 50 мек отправляем состояние бота и сервера
-		if os.time() - timeRespond >= 50 and os.clock() > 10 then
+		if os.time() - timeRespond >= 50 and os.clock() > 30 then
 			timeRespond = os.time();
 
 			-- RespondBot
-			loggerHttpRequest(HOST .. "/", {
+			loggerHttpRequest(HOST .. "/respond", {
 				query = {
 					respondServer = isBotConnected() and "1" or "0",
 					key = AUTH_KEY;
@@ -718,7 +795,7 @@ function _onScriptUpdate() -- main loop -- _onScriptUpdate called on fix.lua
 
 				if bool then
 					timePlayer = os.time();
-					loggerHttpRequest(HOST .. "/", {
+					loggerHttpRequest(HOST .. "/players", {
 						method = "POST",
 						headers = {
 							["Accept"] = "*/*",
@@ -738,7 +815,7 @@ function _onScriptUpdate() -- main loop -- _onScriptUpdate called on fix.lua
 					timeTop = os.time();
 					local tab = getTopTab();
 
-					loggerHttpRequest(HOST .. "/", {
+					loggerHttpRequest(HOST .. "/top", {
 						method = "POST",
 						headers = {
 							["Accept"] = "*/*",
@@ -761,7 +838,7 @@ function _onScriptUpdate() -- main loop -- _onScriptUpdate called on fix.lua
 
 				-- Deliver
 				if currectDeliver ~= -1 then
-					loggerHttpRequest(HOST .. "/", {
+					loggerHttpRequest(HOST .. "/serverTab", {
 						query = {
 							param = currectDeliver,
 							field = "deliver",
@@ -773,7 +850,7 @@ function _onScriptUpdate() -- main loop -- _onScriptUpdate called on fix.lua
 				-- Ping
 				local averagePing = getAveragePing();
 				if averagePing then
-					loggerHttpRequest(HOST .. "/", {
+					loggerHttpRequest(HOST .. "/serverTab", {
 						query = {
 							param = averagePing,
 							field = "ping",
@@ -818,7 +895,7 @@ function onRecvRpc(id, data, size)
 			bitStreamDelete(bs);
 
 			gangZoneActiveCapture[wGangZoneID] = true;
-			loggerHttpRequest(HOST .. "/", {
+			loggerHttpRequest(HOST .. "/gangzoneFlash", {
 				query = {
 					gangZoneID = wGangZoneID,
 					color2 = convertColor[color],
@@ -878,7 +955,7 @@ function onRecvRpc(id, data, size)
 				color1 = convertColor[color];
 			}
 
-			sendPendingCollection("/", "gangZoneSendTab", 1000);
+			sendPendingCollection("/gangzoneAdd", "gangZoneSendTab", 1000);
 
 		elseif id == 93 then -- SendClientMessage
 			--[[
@@ -909,7 +986,7 @@ function onRecvRpc(id, data, size)
 			if message:find("Событие \"Лёгкие деньги\": Двойная оплата труда .+ в течение часа%.") then
 				local job = message:match("Событие \"Лёгкие деньги\": Двойная оплата труда (.+) в течение часа%.");
 
-				loggerHttpRequest(HOST .. "/", {
+				loggerHttpRequest(HOST .. "/serverTab", {
 					query = {
 						param = firstToUpper(job),
 						field = "x2",
@@ -918,7 +995,7 @@ function onRecvRpc(id, data, size)
 				});
 
 			elseif message:find("Событие \"Лёгкие деньги\" завершено%!") then
-				loggerHttpRequest(HOST .. "/", {
+				loggerHttpRequest(HOST .. "/serverTab", {
 					query = {
 						param = "Завершено",
 						field = "x2",
@@ -926,66 +1003,66 @@ function onRecvRpc(id, data, size)
 					}
 				});
 
-			elseif message:find("Лотерея: Через 2 минуты начинаем розыгрыш%, набери %'%/lotto %[номер %(1 %- 80%)%]%'%. Разыгрывается %$%d+%.") then
-				local enact = message:match("Лотерея: Через 2 минуты начинаем розыгрыш%, набери %'%/lotto %[номер %(1 %- 80%)%]%'%. Разыгрывается %$(%d+)%.");
+			-- elseif message:find("Лотерея: Через 2 минуты начинаем розыгрыш%, набери %'%/lotto %[номер %(1 %- 80%)%]%'%. Разыгрывается %$%d+%.") then
+			-- 	local enact = message:match("Лотерея: Через 2 минуты начинаем розыгрыш%, набери %'%/lotto %[номер %(1 %- 80%)%]%'%. Разыгрывается %$(%d+)%.");
 
-				loggerHttpRequest(HOST .. "/", {
-					method = "POST",
-					headers = {
-						["Accept"] = "*/*",
-						["Content-Type"] = "application/x-www-form-urlencoded";
-					},
-					body = {
-						enact = enact,
-						action = "newLotto",
-						key = AUTH_KEY;
-					}
-				});
+			-- 	loggerHttpRequest(HOST .. "/lotto", {
+			-- 		method = "POST",
+			-- 		headers = {
+			-- 			["Accept"] = "*/*",
+			-- 			["Content-Type"] = "application/x-www-form-urlencoded";
+			-- 		},
+			-- 		body = {
+			-- 			enact = enact,
+			-- 			action = "newLotto",
+			-- 			key = AUTH_KEY;
+			-- 		}
+			-- 	});
 
-			elseif message:find("Лотерея: Сегодня выигрышный номер %d+%.") then
-				lottoWinningNumber = message:match("Лотерея: Сегодня выигрышный номер (%d+)%.");
-				lottoWonNick = "";
+			-- elseif message:find("Лотерея: Сегодня выигрышный номер %d+%.") then
+			-- 	lottoWinningNumber = message:match("Лотерея: Сегодня выигрышный номер (%d+)%.");
+			-- 	lottoWonNick = "";
 
-			elseif message:find("Лотерея: .+ выигра[л|ла]+ ДжекПот %$%d+%.") then
-				local nick = message:match("Лотерея: (.+) выигра[л|ла]+ ДжекПот %$(%d+)%.");
-				if lottoWonNick ~= "" then lottoWonNick = lottoWonNick .. ", " end
-				lottoWonNick = lottoWonNick .. nick;
+			-- elseif message:find("Лотерея: .+ выигра[л|ла]+ ДжекПот %$%d+%.") then
+			-- 	local nick = message:match("Лотерея: (.+) выигра[л|ла]+ ДжекПот %$(%d+)%.");
+			-- 	if lottoWonNick ~= "" then lottoWonNick = lottoWonNick .. ", " end
+			-- 	lottoWonNick = lottoWonNick .. nick;
 
-			elseif message:find("Лотерея: Назначен новый ДжекПот: %$%d+%.") then
-				local newJackpot = message:match("Лотерея: Назначен новый ДжекПот: %$(%d+)%.");
+			-- elseif message:find("Лотерея: Назначен новый ДжекПот: %$%d+%.") then
+			-- 	local newJackpot = message:match("Лотерея: Назначен новый ДжекПот: %$(%d+)%.");
 
-				loggerHttpRequest(HOST .. "/", {
-					method = "POST",
-					headers = {
-						["Accept"] = "*/*",
-						["Content-Type"] = "application/x-www-form-urlencoded";
-					},
-					body = {
-						newJackpot = newJackpot,
-						winningNumber = lottoWinningNumber,
-						won = lottoWonNick,
-						action = "newJackpot",
-						key = AUTH_KEY;
-					}
-				});
+			-- 	loggerHttpRequest(HOST .. "/lotto", {
+			-- 		method = "POST",
+			-- 		headers = {
+			-- 			["Accept"] = "*/*",
+			-- 			["Content-Type"] = "application/x-www-form-urlencoded";
+			-- 		},
+			-- 		body = {
+			-- 			newJackpot = newJackpot,
+			-- 			winningNumber = lottoWinningNumber,
+			-- 			won = lottoWonNick,
+			-- 			action = "newJackpot",
+			-- 			key = AUTH_KEY;
+			-- 		}
+			-- 	});
 
-			elseif message:find("Лотерея: Победителей нет%. ДжекПот поднят до %$%d+%.") then
-				local newJackpot = message:match("Лотерея: Победителей нет%. ДжекПот поднят до %$(%d+)%.");
+			-- elseif message:find("Лотерея: Победителей нет%. ДжекПот поднят до %$%d+%.") then
+			-- 	local newJackpot = message:match("Лотерея: Победителей нет%. ДжекПот поднят до %$(%d+)%.");
 
-				loggerHttpRequest(HOST .. "/", {
-					method = "POST",
-					headers = {
-						["Accept"] = "*/*",
-						["Content-Type"] = "application/x-www-form-urlencoded";
-					},
-					body = {
-						newJackpot = newJackpot,
-						winningNumber = lottoWinningNumber,
-						won = "Победителей нет",
-						action = "newJackpot",
-						key = AUTH_KEY;
-					}
-				});
+			-- 	loggerHttpRequest(HOST .. "/lotto", {
+			-- 		method = "POST",
+			-- 		headers = {
+			-- 			["Accept"] = "*/*",
+			-- 			["Content-Type"] = "application/x-www-form-urlencoded";
+			-- 		},
+			-- 		body = {
+			-- 			newJackpot = newJackpot,
+			-- 			winningNumber = lottoWinningNumber,
+			-- 			won = "Победителей нет",
+			-- 			action = "newJackpot",
+			-- 			key = AUTH_KEY;
+			-- 		}
+			-- 	});
 
 			elseif message:find("ID %d+ %- .+ %| Уровень %- %d+") then
 				local id = tonumber(message:match("ID (%d+) %- .+ %| Уровень %- %d+"));
@@ -1011,26 +1088,81 @@ function onRecvRpc(id, data, size)
 					afk = afk,
 					time = afkTime
 				};
-				return true;
+				-- return true;
 
 			elseif message:find("Анти%-флуд %(%d+ сек%.%)%.") then
 				iterationsConnectPlayers = iterationsConnectPlayers - 1;
 				if collectionTop then collectionTopFlud = true end
+				-- return true;
+
+			elseif message:find("Ты кикну[т|та]+.+Модератором .+ %(.+%)%.") then
+				sendTelegramMessage(telegramLastRoom, message);
+				print("Меня кикнули с сервера! Отключаюсь!");
+				Tasking.new(function()
+					Tasking.wait(2000);
+					exit();
+				end)
 				return true;
 
-			elseif message:find("Ты получи[л|ла] выговор от .+%. Причина: .+") then
-				local nick, cause = message:match("Ты получи[л|ла] выговор от (.+)%. Причина: (.+)")
-				sendTelegramMessage(telegramLastRoom, "Я получил выговор от "..nick..". Причина: "..cause);
+			elseif message:find("Ты бы[л|ла]+ кикну[т|та]+ из .+ лидером .+ %(.+%)%.") then
+				local nick = message:match("Ты бы[л|ла]+ кикну[т|та]+ из .+ лидером (.+) %(.+%)%.")
+				sendTelegramMessage(telegramLastRoom, message);
+				Tasking.new(function()
+					nopSendChatCommand = true;
+					Tasking.wait(4500);
+					sendInput("/pm " .. nick .. " Привет. Я использую этот аккаунт для сбора информации,");
+					Tasking.wait(4500);
+					sendInput("/pm " .. nick .. " для сайта. Поэтому стою 24/7 афк. Не мог бы ты принять");
+					Tasking.wait(4500);
+					sendInput("/pm " .. nick .. " обратно? Или сообщить что меня кикнули Sparebola#4145");
+					nopSendChatCommand = false;
+				end)
 				return false;
 
-			elseif message:find(".+ сня[л|ла] тебе один выговор%. Причина: .+") then
-				local nick, cause = message:match("(.+) сня[л|ла] тебе один выговор%. Причина: (.+)");
-				sendTelegramMessage(telegramLastRoom, nick .. " снял тебе один выговор. Причина: "..cause);
+			elseif message:find("Ты получи[л|ла]+ выговор от .+%. Причина: .+") then
+				local nick = message:match("Ты получи[л|ла]+ выговор от (.+)%. Причина: .+")
+				sendTelegramMessage(telegramLastRoom, message);
+				Tasking.new(function()
+					nopSendChatCommand = true;
+					Tasking.wait(4500);
+					sendInput("/pm " .. nick .. " Привет. Я использую этот аккаунт для сбора информации,");
+					Tasking.wait(4500);
+					sendInput("/pm " .. nick .. " для сайта. Поэтому стою 24/7 афк. Не мог бы ты снять");
+					Tasking.wait(4500);
+					sendInput("/pm " .. nick .. " выговор или принять обратно?");
+					nopSendChatCommand = false;
+				end)
 				return false;
 
-			elseif message:find(".+ предложи[л|ла] вступить тебе в .+ %(%/accept team%)%.") then
-				local nick, frac = message:match("(.+) предложи[л|ла] вступить тебе в (.+) %(%/accept team%)%.")
+			elseif message:find(".+ сня[л|ла]+ тебе один выговор%. Причина: .+") then
+				local nick = message:match("(.+) сня[л|ла]+ тебе один выговор%. Причина: .+");
+				sendTelegramMessage(telegramLastRoom, message);
+				Tasking.new(function()
+					nopSendChatCommand = true;
+					Tasking.wait(4500);
+					sendInput("/pm " .. nick .. " Большое спасибо!");
+					nopSendChatCommand = false;
+				end)
+				return false;
+
+			elseif message:find(".+ предложи[л|ла]+ вступить тебе в .+ %(%/accept team%)%.") then
+				local nick, frac = message:match("(.+) предложи[л|ла]+ вступить тебе в (.+) %(%/accept team%)%.")
 				sendTelegramMessage(telegramLastRoom, nick .. " предложил вступить тебе в "..frac);
+				Tasking.new(function()
+					IS_ANTI_AFK = true;
+					nopSendChatCommand = true;
+					Tasking.wait(4500);
+					sendInput("/accept team");
+					Tasking.wait(4500);
+					sendInput("/pm " .. nick .. " Большое спасибо!");
+					Tasking.wait(4500);
+					sendInput("/spawnchange");
+					Tasking.wait(4500);
+					sendSpawn();
+					Tasking.wait(2000);
+					IS_ANTI_AFK = false;
+					nopSendChatCommand = false;
+				end)
 				return false;
 			end
 
@@ -1050,18 +1182,20 @@ function onRecvRpc(id, data, size)
 					[-169954390] = "exp",
 					[-86] = "не получил exp",
 					[-1431655766] = "Анти-флуд",
-					[-1029514582] = "Использует КПК"
+					[-1029514582] = "Использует КПК",
+					[-8433494] = "Грузовой поезд прибыл",
+					[-65366] = "Наши бойцы напали на вражескую территорию"
 				}
 
 				-- Таблица исключений
 				local exception = {
 					"|___________ Новости .+ ___________|",
 					"|___________ Медицинские Новости Штата  ___________|",
-					"Лотерея: Через 2 минуты начинаем розыгрыш%, набери '%/lotto %[номер %(1 %- 80%)%]'%. Разыгрывается %$%d+%.",
+					-- "Лотерея: Через 2 минуты начинаем розыгрыш%, набери '%/lotto %[номер %(1 %- 80%)%]'%. Разыгрывается %$%d+%.",
 					"Событие \"Лёгкие деньги\": Двойная оплата труда .+ в течение часа%.",
-					"Лотерея: Сегодня выигрышный номер %d+%.",
-					"Лотерея: .+ ДжекПот %$%d+%.",
-					"Лотерея: Назначен новый ДжекПот: %$%d+%.",
+					-- "Лотерея: Сегодня выигрышный номер %d+%.",
+					-- "Лотерея: .+ ДжекПот %$%d+%.",
+					-- "Лотерея: Назначен новый ДжекПот: %$%d+%.",
 				}
 
 				-- Таблица не известных мне цвета сообщений
@@ -1080,7 +1214,7 @@ function onRecvRpc(id, data, size)
 				-- Удаляем совпадение по тексту если текст равен исключению
 				for i = 1, #textDeletionTab do
 					if message:find(textDeletionTab[i]) then
-						unnecessaryMessage[color] = nil;
+						unnecessaryMessage[color] = 1;
 					end
 				end
 
@@ -1125,70 +1259,114 @@ function onRecvRpc(id, data, size)
 					weapon = weapon,
 				}
 
-				sendPendingCollection("/", "killListTab", 1000);
+				sendPendingCollection("/killList", "killListTab", 1000);
 			end
 
-		elseif id == 12 then -- SetPlayerPos (Ставим бота возле deliver`a)
+		elseif id == 12 then -- SendSpawn  (Ставим бота возле deliver`a)
 			--[[float x, 
 			float y, 
 			float z]]
 
 			local bs = bitStreamInit(data, size);
 			bitStreamSetWriteOffset(bs, 0);
-			bitStreamWriteFloat(bs, -2196.9040527344);
-			bitStreamWriteFloat(bs, -358.57614135742);
-			bitStreamWriteFloat(bs, 35.475200653076);
+			bitStreamWriteFloat(bs, -2139.5390625);
+			bitStreamWriteFloat(bs, -241.79652404785);
+			bitStreamWriteFloat(bs, 36.515625);
 			bitStreamDelete(bs);
+
+		elseif id == 14 then -- не даём умереть боту в афк
+			-- SetPlayerHealth - ID: 14
+			-- Parameters: float health
+
+
+			local bs = bitStreamInit(data, size);
+			local health = bitStreamReadFloat(bs);
+			bitStreamDelete(bs);
+			if isSpawn and health == 0 then
+				if IS_REQUEST_SERVER_SEND and accesSend and not IS_ANTI_AFK then
+					return true;
+				end
+			end
 		end
 	end
+end
+
+function onSetPosition(x, y, z)
+    local px, py, pz = getPosition()
+    if px == x and py == y and z > pz and slapState == 0 then
+		if os.time() - afkTimer <= 3 then
+			slapState = 1;
+			sendSlapSync(x, y, z, px, py, pz);
+		end
+    end
 end
 
 function onTextLabelShow(labelId, positionX, positionY, positionZ, labelString)
 	if IS_REQUEST_SERVER_SEND and accesSend then
 		if math.floor(positionX) == -2120 and math.floor(positionY) == -179 and math.floor(positionZ) == 35 then
 			currectDeliver = labelString:match("Доступно: (%d+)");
-			print("Матов на деливере: " .. currectDeliver)
+			print("Матов на деливере: " .. currectDeliver);
 		end
 	end
+	return true
 end
 
 function onConnect()
 	connectDate = os.date("%d.%m.%Y %H:%M:%S", os.time(os.date("!*t")) + 10800);
-	if os.clock() > 10 then
+	if os.clock() > 30 then
 		sendTelegramMessage(telegramLastRoom, "Я подключился к серверу!");
 	end
 end
 
 function onDisconnect()
-	Tasking.remove(respawnTask);
-	isSpawn = false;
 	gangZoneActiveCapture = {};
+	currectServerTime = nil
 	playerColor = {};
 	currectDeliver = -1;
-	if os.clock() > 10 then
+	if os.clock() > 30 then
 		sendTelegramMessage(telegramLastRoom, "Я отключился от сервера!");
 	end
 end
 
 function onSpawned()
-	if os.clock() > 10 then
+	if os.clock() > 30 then
 		sendTelegramMessage(telegramLastRoom, "Я заспавнился!");
+	end
+
+	Tasking.new(function()
+		Tasking.wait(3000);
+		
+		local state = getBotState();
+		isSpawn = state == 1 or state == 2 or state == 3; -- доп проверка
+	end)
+end
+
+function onPlayerDeath(playerId)
+	if playerId == getBotId() then
+		sendTelegramMessage(telegramLastRoom, "Я умер!");
 	end
 end
 
 function onSetSkin(playerid, skinId)
 	if playerid == getBotId() and skinId ~= 0 then
-		respawnTask = Tasking.new(function()
-			Tasking.wait(5000);
-
-			if isBotSpawned() and getSkin() ~= 0 then -- доп проверка
-				isSpawn = true;
+		Tasking.new(function()
+			Tasking.wait(20000);
+			if currectDeliver == -1 then
+				-- print("Не получил количество матов на деливере. Переподключаюсь!")
+				-- sendTelegramMessage(telegramLastRoom, "Не получил количество матов на деливере. Переподключаюсь!");
+				-- notCrashRecconect();
 			end
 		end)
 
-		if os.clock() > 10 and accesSend and IS_REQUEST_SERVER_SEND then
+		if os.clock() > 30 and accesSend and IS_REQUEST_SERVER_SEND then
 			sendTelegramMessage(telegramLastRoom, "У меня поменялся скин на: "..skinId);
 		end
+	end
+end
+
+function onCrash()
+	if os.clock() > 30 and accesSend and IS_REQUEST_SERVER_SEND then
+		sendTelegramMessage(telegramLastRoom, "Я крашнул. Всё... Кина не будет сегодня!");
 	end
 end
 
@@ -1197,10 +1375,14 @@ function onPrintLog(string) -- не показываем серверные сообщения в лог
 		if string:find("%[СЕРВЕР%] .+") or string:find("%[RAKBOT%] Отправлен ответ диалогу") then
 			return true;
 		end
-	end
 
-	if string:find("Ваш уровень здоровья изменен на %d+") then
-		return true;
+		if string:find("Ваш уровень здоровья изменен на %d+") then
+			return true;
+		end
+
+		if string:find("Количество денег изменено на") then
+			return true;
+		end
 	end
 end
 
@@ -1210,17 +1392,17 @@ function onSendPacket(id, data, size) -- Ставим себя в афк
 			return true;
 		end
 	end
+	afkTimer = os.time();
 end
 
 -- Не даём флудить подключениями
 local connectTimer = 0;
 function onRequestConnect()
-	if os.clock() > 10 then
-		if os.time() - connectTimer >= 300 then
-			connectTimer = os.time();
-		else
-			return true;
-		end
+	local msecond = (IS_REQUEST_SERVER_SEND and accesSend) and 300000 or getReconnectDelay();
+	if os.time() - connectTimer >= (msecond - 2000) / 1000 then
+		connectTimer = os.time(); 
+	else
+		return true;
 	end
 end
 
@@ -1314,6 +1496,10 @@ end
 
 function onRunCommand(cmd)
 	if cmd == "!x" then
+
+		return true;
+	elseif cmd == "!sendtop" then
+		sendGangZoneSaveTab();
 		return true;
 	end
 end

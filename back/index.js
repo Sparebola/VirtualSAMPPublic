@@ -1,12 +1,16 @@
-const mysql = require('mysql2/promise');
+
 const Koa = require('koa');
 const Router = require('koa-router');
 const koaBody = require('koa-body');
-const fs = require("fs");
-const { isArray } = require('util');
+const serve = require('koa-static');
+const mount = require('koa-mount');
+const { createConnection } = require('mysql2/promise');
+const { appendFileSync } = require("fs");
 
 const AUTH_KEY = "";
 const APPLICATION_PORT = 80;
+const SERVER_PATH = "/virtualsamp/";
+const SERVER_ROUT = SERVER_PATH + "set/";
 
 const DATABASE_OPTIONS = Object.freeze({
 	host: '',
@@ -21,7 +25,7 @@ const MAX_LAST_ACTIVITY_IN_SECONDS = 180; // 3 минуты
 const MILLISECONDS_IN_SECOND = 1_000;
 
 const CHAT = [];
-const MAX_CHAT_MESSAGES_COUNT = 25;
+const MAX_CHAT_MESSAGES_COUNT = 50;
 
 const KILLSTAT = [];
 const MAX_KILLSTAT_LENGTH = 8;
@@ -42,23 +46,23 @@ for (let index = 0; index <= GANGZONES_COUNT; index++) {
 let ONLINE_PLAYERS = [];
 
 const UPDATE_DATA = {
-	players: 0,
+	players: "2021-07-29T14:21:01.372Z",
 	top: {
-		joinz: 0,
-		joinr: 0,
-		paintBall: 0,
-		tags: 0,
+		joinz: "2021-07-29T14:21:01.372Z",
+		joinr: "2021-07-29T14:21:01.372Z",
+		paintBall: "2021-07-29T14:21:01.372Z",
+		tags: "2021-07-29T14:21:01.372Z",
 	},
 	server: {
-		chat: 0,
-		killstat: 0,
-		x2: 0,
-		time: 0,
-		ping: 0,
-		deliver: 0,
-		lotto: 0,
+		chat: "2021-07-29T14:21:01.372Z",
+		killstat: "2021-07-29T14:21:01.372Z",
+		x2: "2021-07-29T14:21:01.372Z",
+		time: "2021-07-29T14:21:01.372Z",
+		ping: "2021-07-29T14:21:01.372Z",
+		deliver: "2021-07-29T14:21:01.372Z",
+		// lotto: "2021-07-29T14:21:01.372Z",
 	},
-	gangZone: 0,
+	gangZone: "2021-07-29T14:21:01.372Z",
 };
 
 const RATING_LISTS = {
@@ -80,15 +84,15 @@ const SERVER_INFO = {
 	time: '2021-06-15 00:00'
 };
 
-const LOTTO = {
-	winningNumber: '-',
-	won: '-',
-	newJackpot: '-',
-	enact: '-',
-};
+// const LOTTO = {
+// 	winningNumber: '-',
+// 	won: '-',
+// 	newJackpot: '-',
+// 	enact: '-',
+// };
 
 const createLogger = (type) => (message) => {
-	fs.appendFileSync('errors.log', `[${type}]: ${message}\n`);
+	appendFileSync('errors.log', `[${type}]: ${message}\n`);
 };
 
 const logger = Object.freeze({
@@ -98,7 +102,7 @@ const logger = Object.freeze({
 
 const createDatabaseConnection = async () => {
 	try {
-		const connection = await mysql.createConnection(DATABASE_OPTIONS);
+		const connection = await createConnection(DATABASE_OPTIONS);
 		// logger.info('Соединение с базой данных установлено.');
 		// console.log('Соединение с базой данных установлено.');
 
@@ -163,8 +167,8 @@ const sendSQLrequest = async (sql) => {
 const init = async (app, router) => {
 
 	// localhost
-	const cors = require('@koa/cors');
-	app.use(cors());
+	// const cors = require('@koa/cors');
+	// app.use(cors());
 
 	// Middlewares, устанавливаем лимиты
 	app.use(koaBody({
@@ -185,7 +189,7 @@ const init = async (app, router) => {
 	});
 
 	// Routes
-	router.post('/', validateAuthKey, async (ctx) => {
+	router.post(SERVER_ROUT + 'gangZoneSave', validateAuthKey, async (ctx) => {
 		if (ctx.request.body) {
 			if (ctx.request.body.tab && ctx.request.body.date) {
 				const tab = JSON.parse(ctx.request.body.tab);
@@ -219,13 +223,13 @@ const init = async (app, router) => {
 		}
 	});
 
-	router.post('/', validateAuthKey, (ctx) => {
+	router.post(SERVER_ROUT + 'chat', validateAuthKey, (ctx) => {
 		if (ctx.request.body) {
 			if (ctx.request.body.tab) {
 				const chatLine = JSON.parse(ctx.request.body.tab);
 
 				if (Array.isArray(chatLine)) {
-					Array.prototype.push.apply(CHAT, chatLine);
+					CHAT.push(chatLine);
 					UPDATE_DATA.server.chat = getMoscowDate();
 
 					if (CHAT.length > MAX_CHAT_MESSAGES_COUNT) {
@@ -252,7 +256,7 @@ const init = async (app, router) => {
 		}
 	});
 
-	router.post('/', validateAuthKey, (ctx) => {
+	router.post(SERVER_ROUT + 'players', validateAuthKey, (ctx) => {
 		if (ctx.request.body) {
 			if (ctx.request.body.tab) {
 				const scoreboard = JSON.parse(ctx.request.body.tab);
@@ -280,7 +284,7 @@ const init = async (app, router) => {
 		}
 	});
 
-	router.post('/', validateAuthKey, (ctx) => {
+	router.post(SERVER_ROUT + 'gangzoneAdd', validateAuthKey, (ctx) => {
 		if (ctx.request.body.tab) {
 			const gangZones = JSON.parse(ctx.request.body.tab);
 
@@ -314,7 +318,7 @@ const init = async (app, router) => {
 		}
 	});
 
-	router.get('/', validateAuthKey, (ctx) => {
+	router.get(SERVER_ROUT + 'gangzoneFlash', validateAuthKey, (ctx) => {
 		const { gangZoneID, color2, flash } = ctx.request.query;
 
 		if (gangZoneID && color2 && flash) {
@@ -339,7 +343,7 @@ const init = async (app, router) => {
 		}
 	});
 
-	router.post('/', validateAuthKey, (ctx) => {
+	router.post(SERVER_ROUT + 'top', validateAuthKey, (ctx) => {
 		const ratingBodyLists = ctx.request.body;
 
 		if (typeof(ratingBodyLists) == "object") {
@@ -349,9 +353,9 @@ const init = async (app, router) => {
 				if (Array.isArray(RATING_LISTS[list])) {
 					success = true;
 					const topTable = JSON.parse(ratingBodyLists[list]);
-					UPDATE_DATA.top[list] = getMoscowDate();
 
 					if (topTable.length > 0) {
+						UPDATE_DATA.top[list] = getMoscowDate();
 						const tab = topTable.map((item) => ({
 							nick: item.nick,
 							points: item.points,
@@ -371,12 +375,12 @@ const init = async (app, router) => {
 		}
 	});
 
-	router.post('/', validateAuthKey, (ctx) => {
+	router.post(SERVER_ROUT + 'killList', validateAuthKey, (ctx) => {
 		if (ctx.request.body.tab) {
 			const killList = JSON.parse(ctx.request.body.tab);
 
 			if (Array.isArray(killList)) {
-				Array.prototype.push.apply(KILLSTAT, killList);
+				KILLSTAT.push(killList);
 				UPDATE_DATA.server.killstat = getMoscowDate();
 
 				if (KILLSTAT.length > MAX_KILLSTAT_LENGTH) {
@@ -398,7 +402,7 @@ const init = async (app, router) => {
 		}
 	});
 
-	router.get('/', validateAuthKey, (ctx) => {
+	router.get(SERVER_ROUT + 'respond', validateAuthKey, (ctx) => {
 		const { respondServer } = ctx.request.query;
 
 		if (typeof(respondServer) == "string") {
@@ -418,7 +422,7 @@ const init = async (app, router) => {
 		}
 	});
 
-	router.get('/', validateAuthKey, (ctx) => {
+	router.get(SERVER_ROUT + 'serverTab', validateAuthKey, (ctx) => {
 		const { field, param } = ctx.request.query;
 
 		if (field && param) {
@@ -437,38 +441,6 @@ const init = async (app, router) => {
 		else {
 			ctx.status = 400;
 			ctx.body = 'Неверные параметры!';
-		}
-	});
-
-	router.post('/', (ctx) => {
-		const { action, newJackpot, won, winningNumber, enact } = ctx.request.body;
-
-		switch (action) {
-			case 'newJackpot':
-				LOTTO.winningNumber = winningNumber;
-				LOTTO.won = won;
-				LOTTO.newJackpot = newJackpot;
-
-				UPDATE_DATA.server.lotto = getMoscowDate();
-				ctx.status = 200;
-				ctx.body = 'Done!';
-				break;
-
-			case 'newLotto':
-				LOTTO.enact = enact;
-				LOTTO.winningNumber = '-';
-				LOTTO.won = '-';
-				LOTTO.newJackpot = '-';
-
-				UPDATE_DATA.server.lotto = getMoscowDate();
-				ctx.status = 200;
-				ctx.body = 'Done!';
-				break;
-
-			default:
-				ctx.status = 400;
-				ctx.body = 'Неверные параметры!';
-				break;
 		}
 	});
 
@@ -558,9 +530,9 @@ const init = async (app, router) => {
 						time: UPDATE_DATA.server.time,
 						ping: UPDATE_DATA.server.ping,
 						deliver: UPDATE_DATA.server.deliver,
-						lotto: UPDATE_DATA.server.lotto,
+						// lotto: UPDATE_DATA.server.lotto,
 					},
-					lotto: LOTTO, 
+					// lotto: LOTTO, 
 					ping: SERVER_INFO.ping, 
 					deliver: SERVER_INFO.deliver, 
 					time: SERVER_INFO.time,
@@ -577,7 +549,8 @@ const init = async (app, router) => {
 		}
 	});
 
-	router.get('/virtualsamp/api', async (ctx) => {
+	// API
+	router.get(SERVER_PATH + 'api', async (ctx) => {
 		const { action } = ctx.request.query;
 		const callback = API_ACTIONS[action];
 
@@ -590,6 +563,7 @@ const init = async (app, router) => {
 		}
 	});
 
+	app.use(mount(SERVER_PATH, serve('../front')));
 	app.use(router.routes())
 	app.use(router.allowedMethods());
 

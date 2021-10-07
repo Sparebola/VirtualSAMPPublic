@@ -213,6 +213,13 @@ function getMoscowDate() {
     return new Date( new Date().getTime() + offset * 3600 * 1000 ).toUTCString().replace(/:\d\d GMT$/, "" );
 }
 
+function getMoscowDateGG() {
+	const offset = 180; // в минутах часовой пояс Москвы +3 часа = +180 минут
+	const D = new Date();
+	D.setMinutes( D.getMinutes() + D.getTimezoneOffset() + offset);
+	return D;
+}
+
 function setStaticContent() {
 	(async () => {
 		const response = await fetch(url + "static");
@@ -245,44 +252,55 @@ function setStaticContent() {
 
 			// Lotto
 			// Cумма Джекпота
-			let money = new Intl.NumberFormat("de-DE").format(tab.lotto.enact);
-			enact.innerHTML = tab.lotto.enact == "-" ? tab.lotto.enact : money + "$";
+			// let money = new Intl.NumberFormat("de-DE").format(tab.lotto.enact);
+			// enact.innerHTML = tab.lotto.enact == "-" ? tab.lotto.enact : money + "$";
 
 			// Выигрышный номер
-			winningNumber.innerHTML = tab.lotto.winningNumber;
+			// winningNumber.innerHTML = tab.lotto.winningNumber;
 
 			// Выиграли
-			won.innerHTML = tab.lotto.won;
+			// won.innerHTML = tab.lotto.won;
 
 			// Новый Джекпот
-			money = new Intl.NumberFormat("de-DE").format(tab.lotto.newJackpot);
-			newJackpot.innerHTML = tab.lotto.newJackpot == "-" ? tab.lotto.newJackpot : money + "$";
+			// money = new Intl.NumberFormat("de-DE").format(tab.lotto.newJackpot);
+			// newJackpot.innerHTML = tab.lotto.newJackpot == "-" ? tab.lotto.newJackpot : money + "$";
 
 			// Ставим предупреждения если информация старая
 			const update = tab.update;
             currectTime = getMoscowDateUpdate().getTime();
 			const diffTimeTab = {
-				x2: 7230,
+				x2: 3690,
 				time: 70,
 				ping: 60,
 				deliver: 1200,
-				lotto: 3630
+				// lotto: 3630
 			}
 
-			console.log(update);
             for (const list in update) {
                 // Если в колонке есть информация
 				const updateTime = new Date(update[list]);
 				const diff = diffDates(currectTime, updateTime.getTime());
 				if (diff > diffTimeTab[list]) {
-					// Ставим видимость блоку с предупреждением
-					let el = document.getElementById("warning_" + list);
-					el.style.display = "flex";
 
-					// Записываем время ласт обновления
-					const time = new Date((update[list]).slice(0, -5));
-					el = document.getElementById("warning_" + list + "Text");
-					el.innerHTML = getStringDateByDate(time);
+					let isCurrectWarning = true;
+					// x2 только в 8 и 12 часов. Варнинг в остальное время не нужен
+					if (list == "x2") {
+						const hour = getMoscowDateGG().getHours();
+						if (hour != 8 && hour != 12) {
+							isCurrectWarning = false;
+						} 
+					}
+
+					if (isCurrectWarning) {
+						// Ставим видимость блоку с предупреждением
+						let el = document.getElementById("warning_" + list);
+						el.style.display = "flex";
+
+						// Записываем время ласт обновления
+						const time = new Date((update[list]).slice(0, -5));
+						el = document.getElementById("warning_" + list + "Text");
+						el.innerHTML = getStringDateByDate(time);
+					}
 				}
             };
         } else {

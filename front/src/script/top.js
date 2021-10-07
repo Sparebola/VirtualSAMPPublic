@@ -7,6 +7,7 @@ function createDiv(tab, element) {
     
             const divSub = document.createElement('div');
                 divSub.className = "top-lines";
+                divSub.style.color = getColorInPlace(tab.length - i - 1);
             el.prepend(divSub);
     
             const vidLines2 = document.createElement('div');
@@ -29,6 +30,15 @@ function createDiv(tab, element) {
             divSub.innerHTML = "Нет участников/информации";
         el.prepend(divSub);
     }
+}
+
+function getColorInPlace(place) {
+    const colorPlace = [
+        "#ffd700",
+        "#c0c0c0",
+        "#cd7f32"
+    ];
+    return colorPlace[place] || "#ffffff";
 }
 
 function getMoscowDate() {
@@ -75,6 +85,7 @@ function request() {
                 if (tab[list].length > 0) {
                     const updateTime = new Date(update[list]);
                     const diff = diffDates(currectTime, updateTime.getTime());
+                    // console.log(diff);
                     if (diff > 180) {
                         // Ставим видимость блоку с предупреждением
                         let el = document.getElementById("warning_" + list);

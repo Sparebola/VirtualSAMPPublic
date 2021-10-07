@@ -849,7 +849,7 @@ function createSchedule(labels, datasets) {
 	}
 }
 
-function createDataPicker(name, date, tab) {
+function createDataPicker(name, date, tab, offset) {
 	const datepicker = $(name).datepicker().data('datepicker');
 	datepicker.update(tab);
 	datepicker.selectDate(date);
@@ -859,7 +859,7 @@ function createDataPicker(name, date, tab) {
 	if (mediaQuery.matches) {
 		datepicker.update({
 			position: "left top",
-			offset: -115
+			offset: offset
 		});
 	}
 	return datepicker;
@@ -904,14 +904,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		autoClose: true,
 		toggleSelected: false,
 		onSelect: dateHandling
-	});
+	}, -115);
 
 	const currectDate = new Date();
 	const diff = diffDates(new Date("2021/07/29").getTime(), currectDate.getTime()); // Сколько прошло секунд с 2021/07/29
-	const passedDay = Math.floor(diff / 86400); // Переводим секунды в дни
-	if (passedDay > 7) {
+	let passedDay = Math.floor(diff / 86400); // Переводим секунды в дни
+	if (passedDay > 14) {
 		// Максимум 7 дней назад
-		passedDay = 7;
+		passedDay = 14;
 	}
 
 	const sevenAgoDate = new Date();
@@ -925,7 +925,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		toggleSelected: false,
 		autoClose: true,
 		onSelect: dateSchedule
-	});
+	}, -225);
 
 	// График гангзон
 	// createSchedule();

@@ -20,7 +20,7 @@ function html() {
             removeAttributeQuotes: true,
             removeComments: true
         }))
-        .pipe(rev())
+        // .pipe(rev())
         .pipe(dest("dist/rev/template"))
         .pipe(rev.manifest())
         .pipe(dest("dist/rev/html"));
