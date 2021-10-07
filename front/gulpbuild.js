@@ -6,8 +6,6 @@ const include = require("gulp-file-include"); // Вставка повторяю
 const del = require("del"); // Удаление
 const autoprefixer = require("gulp-autoprefixer"); // Префиксы для поддержки старых браузеров
 const imagemin = require('gulp-imagemin'); // Оптимизация картинок
-const rev = require('gulp-rev'); // Добавление хэша после названия
-const revCollector = require('gulp-rev-collector'); // Изменение названия подключения в link
 
 // Компиляция html
 function html() {
@@ -20,10 +18,7 @@ function html() {
             removeAttributeQuotes: true,
             removeComments: true
         }))
-        // .pipe(rev())
-        .pipe(dest("dist/rev/template"))
-        .pipe(rev.manifest())
-        .pipe(dest("dist/rev/html"));
+        .pipe(dest("dist"));
 }
 
 // Компиляция css
@@ -35,16 +30,12 @@ function css() {
             ]
         }))
         .pipe(csso())
-        .pipe(rev())
-        .pipe(dest("dist/rev/template"))
-        .pipe(rev.manifest())
-        .pipe(dest("dist/rev/css"));
+        .pipe(dest("dist/assets/css"));
 }
 
 // Компиляция image в папке src/img
 function img() {
-    // return src(["src/img/*", "!src/img/samap.png", "!src/img/samapCap.png"])
-    return src("src/img/*")
+    return src("src/img/**")
         // .pipe(imagemin({
         //     progressive: true,
         //     svgoPlugins: [
@@ -55,59 +46,19 @@ function img() {
         //     interlaced: true,
         //     optimizationLevel: 3
         // }))
-        .pipe(rev())
-        .pipe(dest("dist/assets/img"))
-        .pipe(rev.manifest())
-        .pipe(dest("dist/rev/img"));
-};
-
-// Просто копирование картинок из img/Fists с сжатием
-function imgFist() {
-    return src("src/img/Fists/*.png")
-        // .pipe(imagemin({
-        //     progressive: true,
-        //     interlaced: true,
-        //     optimizationLevel: 5
-        // }))
-        .pipe(dest("dist/assets/img/Fists"));
+        .pipe(dest("dist/assets/img"));
 };
 
 // Компиляция javascript
 function js() {
     return src("src/script/**.js")
         .pipe(uglify())
-        .pipe(rev())
-        .pipe(dest("dist/script"))
-        .pipe(rev.manifest())
-        .pipe(dest("dist/rev/script"));
+        .pipe(dest("dist/script"));
 };
-
-// Меняем подключение всех файлов в html
-function revHtml() {
-    return src(['dist/rev/**/*.json', 'dist/rev/template/*.html'])
-        .pipe( revCollector({
-            replaceReved: true
-        }))
-        .pipe(dest('dist'));
-}
-
-// Меняем подключение всех файлов в css
-function revCss() {
-    return src(['dist/rev/**/*.json', 'dist/rev/template/*.css'])
-        .pipe( revCollector({
-            replaceReved: true
-        }))
-        .pipe(dest('dist/assets/css'));
-}
 
 // Отчистка
 function clearDist() {
     return del("dist");
 };
 
-// Отчистка
-function clearRev() {
-    return del("dist/rev");
-};
-
-exports.build = series(clearDist, html, css, js, img, imgFist, revHtml, revCss, clearRev); // Скомпилировать проект
+exports.build = series(clearDist, html, css, js, img); // Скомпилировать проект
