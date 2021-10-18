@@ -1,5 +1,5 @@
 # Virtual SAMP
-Исходный код проекта <br />
+Исходный код проекта для Galaxy-RPG One.<br />
 ### https://sparebola.ru/virtualsamp/index.html
 Был создан ради обучения, опен-сурс на память) <br />
 # Скрины
