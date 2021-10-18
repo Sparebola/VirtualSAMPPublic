@@ -1,5 +1,6 @@
 # Virtual SAMP
-Исходный код проекта ### https://sparebola.ru/virtualsamp/index.html <br />
+Исходный код проекта <br />
+### https://sparebola.ru/virtualsamp/index.html
 Был создан ради обучения, опен-сурс на память) <br />
 # Скрины
 <p align="center">
